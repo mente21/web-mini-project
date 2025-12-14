@@ -264,6 +264,7 @@ function renderGradebook() {
                         <th style="width:200px">Student</th>
                         ${assessments.map(a => `<th style="${a.id === 999 ? 'background:#fffbeb;' : ''}">${a.title} (${a.maxPoints})</th>`).join('')}
                         <th>Total</th>
+                        <th>Grade</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -288,13 +289,15 @@ function renderGradebook() {
                             `;
                         }).join('');
 
-                        let badgeClass = totalEarned >= 90 ? 'badge-good' : (totalEarned >= 60 ? 'badge-avg' : 'badge-bad');
+                        let badgeClass = totalEarned >= 85 ? 'badge-good' : (totalEarned >= 50 ? 'badge-avg' : 'badge-bad');
+                        const letter = getLetterGrade(totalEarned);
 
                         return `
                             <tr>
                                 <td><strong>${s.name}</strong><br><small>${s.id}</small></td>
                                 ${gradesCells}
                                 <td><span class="badge ${badgeClass}">${totalEarned}</span></td>
+                                <td><strong>${letter}</strong></td>
                             </tr>
                         `;
                     }).join('')}
@@ -302,6 +305,19 @@ function renderGradebook() {
             </table>
         </div>
     `;
+}
+
+function getLetterGrade(score) {
+    if (score >= 85) return 'A';
+    if (score >= 80) return 'A-';
+    if (score >= 75) return 'B+';
+    if (score >= 70) return 'B';
+    if (score >= 65) return 'B-';
+    if (score >= 60) return 'C+';
+    if (score >= 55) return 'C';
+    if (score >= 50) return 'C-';
+    if (score >= 40) return 'D';
+    return 'F';
 }
 
 // Logic Functions
@@ -330,8 +346,6 @@ window.updateGrade = (sid, aid, value) => {
     const key = `${sid}_${aid}`;
     grades[key] = value;
     localStorage.setItem('edu_grades', JSON.stringify(grades));
-    // No full re-render for performance, just update local badge if needed, 
-    // but full render is safer for totals.
     renderGradebook();
 };
 
