@@ -308,9 +308,10 @@ function renderGradebook() {
 }
 
 function getLetterGrade(score) {
+    if (score >= 90) return 'A+';
     if (score >= 85) return 'A';
     if (score >= 80) return 'A-';
-    if (score >= 75) return 'B+';
+    if (score >= 75) return 'B+';A
     if (score >= 70) return 'B';
     if (score >= 65) return 'B-';
     if (score >= 60) return 'C+';
