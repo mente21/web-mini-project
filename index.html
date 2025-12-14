@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduTrack | Teacher's Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside>
+            <div class="logo">
+                <ion-icon name="school-outline"></ion-icon>
+                <span>EduTrack</span>
+            </div>
+            
+            <nav>
+                <button class="nav-btn active" data-tab="overview">
+                    <ion-icon name="grid-outline"></ion-icon> Overview
+                </button>
+                <button class="nav-btn" data-tab="students">
+                    <ion-icon name="people-outline"></ion-icon> Students
+                </button>
+                <button class="nav-btn" data-tab="assessments">
+                    <ion-icon name="library-outline"></ion-icon> Assessments
+                </button>
+                <button class="nav-btn" data-tab="attendance">
+                    <ion-icon name="calendar-outline"></ion-icon> Attendance
+                </button>
+                <button class="nav-btn" data-tab="grades">
+                    <ion-icon name="stats-chart-outline"></ion-icon> Gradebook
+                </button>
+            </nav>
+
+            <div class="user-profile">
+                <div class="avatar">T</div>
+                <div class="info">
+                    <p class="name">Teacher</p>
+                    <p class="role">Instructor</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main>
+            <header>
+                <button id="menuToggle" class="mobile-only btn-text" style="font-size:1.5rem; color:var(--text-main); margin-right:1rem;">
+                    <ion-icon name="menu-outline"></ion-icon>
+                </button>
+                <h2 id="pageTitle">Dashboard Overview</h2>
+                <div class="date-display" id="dateDisplay"></div>
+            </header>
+            
+            <div id="contentArea">
+                <!-- Dynamic Content injected here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="modalOverlay" class="modal-overlay hidden">
+        <div class="modal">
+            <h3 id="modalTitle">Add Item</h3>
+            <form id="modalForm">
+                <!-- Dynamic Form Fields -->
+            </form>
+            <div class="modal-actions">
+                <button type="button" class="btn-text" id="closeModal">Cancel</button>
+                <button type="submit" form="modalForm" class="btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
