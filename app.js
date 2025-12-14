@@ -26,9 +26,7 @@ Object.keys(rawAttendance).forEach(key => {
     }
 });
 
-let announcements = JSON.parse(localStorage.getItem('edu_announcements_list')) || [
-    {id: 1, text: "Welcome to EduTrack! Please check the new Grading policy.", date: new Date().toLocaleDateString()}
-];
+let schedule = JSON.parse(localStorage.getItem('edu_schedule')) || [];
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -102,24 +100,33 @@ function renderOverview() {
                 </table>
             </div>
 
-            <!-- Announcements -->
+            <!-- Weekly Schedule -->
             <div class="card">
-                <h3>📢 Announcements</h3>
-                <div style="margin-top:1rem; display:flex; gap:10px;">
-                    <input type="text" id="announceInput" placeholder="Post an update..." style="flex:1; border:1px solid #ddd; padding:8px; border-radius:6px;">
-                    <button class="btn-primary" onclick="postAnnouncement()">Post</button>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>📅 Weekly Schedule</h3>
+                    <button class="btn-primary" onclick="openModal('schedule')" style="font-size:0.85rem; padding:6px 12px;">
+                        <ion-icon name="add-outline"></ion-icon> Add Class
+                    </button>
                 </div>
-                <div class="announcement-list" style="margin-top:1rem; max-height:200px; overflow-y:auto;">
-                    ${announcements.map(a => `
-                        <div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:start;">
+                <div style="margin-top:1rem; max-height:250px; overflow-y:auto;">
+                    ${schedule.length === 0 ? '<p style="color:var(--text-secondary); text-align:center; padding:20px;">No classes scheduled yet.</p>' : ''}
+                    ${schedule.sort((a, b) => {
+                        const dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                        const dayDiff = dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day);
+                        if (dayDiff !== 0) return dayDiff;
+                        return a.time.localeCompare(b.time);
+                    }).map(s => `
+                        <div style="padding:10px; border-left:3px solid var(--primary); background:#f9fafb; margin-bottom:8px; border-radius:4px; display:flex; justify-content:space-between; align-items:start;">
                             <div>
-                                <p style="margin:0; font-size:0.95rem;">${a.text}</p>
-                                <small style="color:grey;">${a.date}</small>
+                                <div style="display:flex; gap:10px; align-items:center;">
+                                    <span class="badge" style="background:var(--primary); color:white;">${s.day}</span>
+                                    <strong style="color:var(--text-main);">${s.time}</strong>
+                                </div>
+                                <p style="margin:5px 0 0 0; font-size:0.95rem;">${s.subject}${s.room ? ` - Room ${s.room}` : ''}</p>
                             </div>
-                            <div style="display:flex; gap:5px;">
-                                <button class="btn-text" onclick="editAnnouncementItem(${a.id})" style="color:var(--primary); padding:2px;"><ion-icon name="pencil-outline"></ion-icon></button>
-                                <button class="btn-text" onclick="deleteAnnouncementItem(${a.id})" style="color:var(--danger); padding:2px;"><ion-icon name="trash-outline"></ion-icon></button>
-                            </div>
+                            <button class="btn-text" onclick="deleteScheduleItem(${s.id})" style="color:var(--danger); padding:2px;">
+                                <ion-icon name="trash-outline"></ion-icon>
+                            </button>
                         </div>
                     `).join('')}
                 </div>
@@ -322,25 +329,11 @@ function getLetterGrade(score) {
 }
 
 // Logic Functions
-window.postAnnouncement = () => {
-    const input = document.getElementById('announceInput');
-    const text = input.value.trim();
-    if(text) {
-        announcements.unshift({ id: Date.now(), text, date: new Date().toLocaleDateString() });
-        localStorage.setItem('edu_announcements_list', JSON.stringify(announcements));
-        renderOverview();
-    }
-};
-
-window.deleteAnnouncementItem = (id) => {
-    if(!confirm("Delete this announcement?")) return;
-    announcements = announcements.filter(a => a.id !== id);
-    localStorage.setItem('edu_announcements_list', JSON.stringify(announcements));
+window.deleteScheduleItem = (id) => {
+    if(!confirm("Delete this class?")) return;
+    schedule = schedule.filter(s => s.id !== id);
+    localStorage.setItem('edu_schedule', JSON.stringify(schedule));
     renderOverview();
-};
-
-window.editAnnouncementItem = (id) => {
-    openModal('announcement', id);
 };
 
 window.updateGrade = (sid, aid, value) => {
@@ -431,16 +424,34 @@ window.openModal = (type, editId = null) => {
             <input type="hidden" name="type" value="assessment">
             <input type="hidden" name="editId" value="${editId || ''}">
         `;
-    } else if (type === 'announcement') {
-        const existing = announcements.find(a => a.id === editId);
-        modalTitle.textContent = "Edit Announcement";
+    } else if (type === 'schedule') {
+        modalTitle.textContent = "Add Class";
         modalForm.innerHTML = `
             <div class="form-group">
-                <label>Message</label>
-                <textarea name="text" rows="4" style="width:100%; padding:10px; border-radius:6px; border:1px solid #ddd;" required>${existing ? existing.text : ''}</textarea>
+                <label>Day</label>
+                <select name="day" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px;">
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                    <option value="Friday">Friday</option>
+                    <option value="Saturday">Saturday</option>
+                    <option value="Sunday">Sunday</option>
+                </select>
             </div>
-            <input type="hidden" name="type" value="announcement">
-            <input type="hidden" name="editId" value="${editId || ''}">
+            <div class="form-group">
+                <label>Time</label>
+                <input type="time" name="time" required>
+            </div>
+            <div class="form-group">
+                <label>Subject</label>
+                <input type="text" name="subject" placeholder="e.g. Mathematics" required>
+            </div>
+            <div class="form-group">
+                <label>Room (Optional)</label>
+                <input type="text" name="room" placeholder="e.g. 101">
+            </div>
+            <input type="hidden" name="type" value="schedule">
         `;
     }
 };
@@ -482,14 +493,17 @@ modalForm.addEventListener('submit', (e) => {
         }
         localStorage.setItem('edu_assessments', JSON.stringify(assessments));
         switchTab('assessments');
-    } else if (type === 'announcement') {
-        const idx = announcements.findIndex(a => a.id == editId);
-        if (idx !== -1) {
-            announcements[idx].text = formData.get('text');
-            announcements[idx].date = new Date().toLocaleDateString() + " (Edited)";
-            localStorage.setItem('edu_announcements_list', JSON.stringify(announcements));
-            renderOverview();
-        }
+    } else if (type === 'schedule') {
+        const scheduleItem = {
+            id: Date.now(),
+            day: formData.get('day'),
+            time: formData.get('time'),
+            subject: formData.get('subject'),
+            room: formData.get('room') || ''
+        };
+        schedule.push(scheduleItem);
+        localStorage.setItem('edu_schedule', JSON.stringify(schedule));
+        switchTab('overview');
     }
 
     modal.classList.add('hidden');
